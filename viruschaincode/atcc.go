@@ -1,4 +1,4 @@
-package main
+package chaincode
 
 import (
   "fmt"
@@ -38,7 +38,7 @@ func (t *VirusChaincode) InitLedger(ctx contractapi.TransactionContextInterface)
 
         err = ctx.GetStub().PutState(signature.SignatureID, virusJSON)
         if err != nil {
-            return fmt.Errorf("failed to put virus signature %s onto ledger: %v", signature.SignatureID, err)
+			      return fmt.Errorf("failed to put to world state. %v", err)
         }
     }
 

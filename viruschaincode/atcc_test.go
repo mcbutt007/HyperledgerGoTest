@@ -1,58 +1,62 @@
-package main
+package chaincode_test
 
 import (
-    "testing"
-    "github.com/hyperledger/fabric-chaincode-go/shim"
-    "github.com/hyperledger/fabric-chaincode-go/shimtest"
+	// "encoding/json"
+	"chaincode"
+	"fmt"
+	"testing"
+
+	"github.com/hyperledger/fabric-chaincode-go/shim"
+	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+
+	// "github.com/hyperledger/fabric-protos-go/ledger/queryresult"
+	"github.com/hyperledger/fabric-samples/asset-transfer-basic/chaincode-go/chaincode/mocks"
+	"github.com/stretchr/testify/require"
 )
 
-func TestVirusChaincode(t *testing.T) {
-    // Create a new instance of the chaincode
-    chaincode := new(VirusChaincode)
-
-    // Create a new ChaincodeMockStub
-    stub := shimtest.NewMockStub("mockstub", chaincode)
-
-    // Test InitLedger function
-    response := stub.MockInit("1", nil)
-    if response.Status != shim.OK {
-        t.Errorf("InitLedger failed: %s", response.Message)
-    }
-
-    // Test UploadSignature function
-    response = stub.MockInvoke("1", [][]byte{[]byte("UploadSignature"), []byte("1"), []byte("Virus1"), []byte("QmHash")})
-    if response.Status != shim.OK {
-        t.Errorf("UploadSignature failed: %s", response.Message)
-    }
-
-    // Test GetSignature function
-    response = stub.MockInvoke("1", [][]byte{[]byte("GetSignature"), []byte("1")})
-    if response.Status != shim.OK {
-        t.Errorf("GetSignature failed: %s", response.Message)
-    }
-
-    // Test UpdateSignature function
-    response = stub.MockInvoke("1", [][]byte{[]byte("UpdateSignature"), []byte("1"), []byte("NewVirusName"), []byte("NewQmHash")})
-    if response.Status != shim.OK {
-        t.Errorf("UpdateSignature failed: %s", response.Message)
-    }
-
-    // Test DeleteSignature function
-    response = stub.MockInvoke("1", [][]byte{[]byte("DeleteSignature"), []byte("1")})
-    if response.Status != shim.OK {
-        t.Errorf("DeleteSignature failed: %s", response.Message)
-    }
-
-    // Test SignatureExists function
-    response = stub.MockInvoke("1", [][]byte{[]byte("SignatureExists"), []byte("1")})
-    if response.Status != shim.OK {
-        t.Errorf("SignatureExists failed: %s", response.Message)
-    }
-
-    // Test GetAllSignatures function
-    response = stub.MockInvoke("1", [][]byte{[]byte("GetAllSignatures")})
-    if response.Status != shim.OK {
-        t.Errorf("GetAllSignatures failed: %s", response.Message)
-    }
+//go:generate counterfeiter -o mocks/transaction.go -fake-name TransactionContext . transactionContext
+type transactionContext interface {
+	contractapi.TransactionContextInterface
 }
 
+//go:generate counterfeiter -o mocks/chaincodestub.go -fake-name ChaincodeStub . chaincodeStub
+type chaincodeStub interface {
+	shim.ChaincodeStubInterface
+}
+
+//go:generate counterfeiter -o mocks/statequeryiterator.go -fake-name StateQueryIterator . stateQueryIterator
+type stateQueryIterator interface {
+	shim.StateQueryIteratorInterface
+}
+
+func TestInitLedger(t *testing.T) {
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+
+	assetTransfer := chaincode.VirusChaincode{}
+	err := assetTransfer.InitLedger(transactionContext)
+	require.NoError(t, err)
+
+	chaincodeStub.PutStateReturns(fmt.Errorf("failed inserting key"))
+	err = assetTransfer.InitLedger(transactionContext)
+	require.EqualError(t, err, "failed to put to world state. failed inserting key")
+}
+
+func TestCreateAsset(t *testing.T) {
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+
+	assetTransfer := chaincode.VirusChaincode{}
+	err := assetTransfer.UploadSignature(transactionContext, "", "", "", "")
+	require.NoError(t, err)
+
+	chaincodeStub.GetStateReturns([]byte{}, nil)
+	err = assetTransfer.UploadSignature(transactionContext, "", "virus1", "", "")
+	require.EqualError(t, err, "the asset asset1 already exists")
+
+	chaincodeStub.GetStateReturns(nil, fmt.Errorf("unable to retrieve asset"))
+	err = assetTransfer.UploadSignature(transactionContext, "", "virus1","", "")
+	require.EqualError(t, err, "failed to read from world state: unable to retrieve asset")
+}
