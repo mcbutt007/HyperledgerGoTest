@@ -1,8 +1,8 @@
 package chaincode_test
 
 import (
-	"encoding/json"
 	"chaincode"
+	"encoding/json"
 	"fmt"
 	"testing"
 
