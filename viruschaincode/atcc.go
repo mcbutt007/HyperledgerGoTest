@@ -8,12 +8,12 @@ import (
 	"time"
 )
 
-// SmartContract provides functions for managing an Asset
+// SmartContract provides functions for managing an signature
 type VirusChaincode struct {
 	contractapi.Contract
 }
 
-// Asset describes basic details of what makes up a simple asset
+// signature describes basic details of what makes up a simple signature
 // Insert struct field in alphabetic order => to achieve determinism accross languages
 // golang keeps the order when marshal to json but doesn't order automatically
 type VirusSignature struct {
@@ -140,14 +140,13 @@ func (t *VirusChaincode) SignatureExists(ctx contractapi.TransactionContextInter
 }
 
 func (t *VirusChaincode) GetAllSignatures(ctx contractapi.TransactionContextInterface) ([]*VirusSignature, error) {
-	// Retrieve all virus signatures from the ledger
 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
-		return nil, fmt.Errorf("failed to read virus signatures from ledger: %v", err)
+		return nil, err
 	}
 	defer resultsIterator.Close()
 
-	var virusSignatures []*VirusSignature
+	var signatures []*VirusSignature
 	for resultsIterator.HasNext() {
 		queryResponse, err := resultsIterator.Next()
 		if err != nil {
@@ -159,10 +158,10 @@ func (t *VirusChaincode) GetAllSignatures(ctx contractapi.TransactionContextInte
 		if err != nil {
 			return nil, err
 		}
-		virusSignatures = append(virusSignatures, &signature)
+		signatures = append(signatures, &signature)
 	}
 
-	return virusSignatures, nil
+	return signatures, nil
 }
 
 func main() {
