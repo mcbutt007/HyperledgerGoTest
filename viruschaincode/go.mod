@@ -1,13 +1,12 @@
-module chaincode
+module virusChaincode
 
-go 1.22.0
+go 1.21.6
 
 require (
 	github.com/hyperledger/fabric-chaincode-go v0.0.0-20240124143825-7dec3c7e7d45
 	github.com/hyperledger/fabric-contract-api-go v1.2.2
-	github.com/hyperledger/fabric-protos-go v0.3.0
+	github.com/hyperledger/fabric-protos-go v0.3.3
 	github.com/hyperledger/fabric-samples/asset-transfer-basic/chaincode-go v0.0.0-20240412035548-820368571d1f
-	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1
 	github.com/stretchr/testify v1.9.0
 )
 
@@ -33,9 +32,8 @@ require (
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.17.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231030173426-d783a09b4405 // indirect
 	google.golang.org/grpc v1.59.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
