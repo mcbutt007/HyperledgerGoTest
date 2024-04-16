@@ -86,7 +86,7 @@ func (t *VirusChaincode) GetSignature(ctx contractapi.TransactionContextInterfac
 
 	return &signature, nil
 }
-func (t *VirusChaincode) UpdateSignature(ctx contractapi.TransactionContextInterface, newIPFSHash string, signatureID string, newVirusName string) error {
+func (t *VirusChaincode) UpdateSignature(ctx contractapi.TransactionContextInterface, newIPFSHash string, signatureID string, uploader string, newVirusName string) error {
 	// Retrieve the existing virus signature from the ledger
 	exists, err := t.SignatureExists(ctx, signatureID)
 	if err != nil {
@@ -100,6 +100,7 @@ func (t *VirusChaincode) UpdateSignature(ctx contractapi.TransactionContextInter
 		IPFSHash:    newIPFSHash,
 		SignatureID: signatureID,
 		Timestamp:   time.Now().Unix(),
+		Uploader:    uploader,
 		VirusName:   newVirusName,
 	}
 
